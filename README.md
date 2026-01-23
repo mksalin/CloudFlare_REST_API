@@ -35,7 +35,7 @@ wrangler d1 create my-db
 wrangler d1 execute my-db --remote --file=./schema.sql
 ```
 
-# Set your Admin Password (used for adding/deleting)
+### Set your Admin Password (used for adding/deleting)
 ```bash
 wrangler secret put ADMIN_PASSWORD
 ```
@@ -45,7 +45,7 @@ wrangler secret put ADMIN_PASSWORD
 wrangler deploy
 ```
 
-### 2. Frontend Configuration
+### 3. Frontend Configuration
 Open `frontend/script.js` and pdate the API_URL to point to your deployed Cloudflare Worker URL:
 
 ```bash
