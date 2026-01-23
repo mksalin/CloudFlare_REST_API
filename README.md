@@ -46,13 +46,13 @@ wrangler deploy
 ```
 
 ### 2. Frontend Configuration
-Open frontend/script.js and pdate the API_URL to point to your deployed Cloudflare Worker URL:
+Open `frontend/script.js` and pdate the API_URL to point to your deployed Cloudflare Worker URL:
 
 ```bash
 const API_URL = "[https://your-worker-name.your-subdomain.workers.dev](https://your-worker-name.your-subdomain.workers.dev)";
 ```
 
-In GitHub Settings > Pages, ensure the build source is set to your preferred method (e.g., GitHub Actions pointing to the /frontend folder in static.yml)
+In GitHub Settings > Pages, ensure the build source is set to your preferred method (e.g., GitHub Actions pointing to the `/frontend` folder in `static.yml`)
 
 ### 4. Usage
 Open your GitHub Pages URL.
