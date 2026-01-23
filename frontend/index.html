@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Python DB Manager</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="container">
+    <h2>🐍 Python DB Manager</h2>
+
+    <div class="auth-section">
+        <label for="adminKey">Admin Authentication</label>
+        <input type="password" id="adminKey" placeholder="Enter Secret Key to Modify Data">
+    </div>
+
+    <div class="input-group">
+        <input type="text" id="msgInput" placeholder="Write something to the database...">
+        <button class="btn-add" id="addBtn">Add Row</button>
+    </div>
+
+    <hr>
+
+    <div id="loading" class="loading">Fetching data from Cloudflare...</div>
+    <div id="messageList"></div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
