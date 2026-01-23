@@ -2,65 +2,119 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Python DB Manager</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Database Manager</title>
     <style>
-        body { font-family: sans-serif; max-width: 500px; margin: 40px auto; padding: 20px; }
-        .row { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid #eee; }
-        button { cursor: pointer; }
-        .del-btn { color: red; border: 1px solid red; background: none; border-radius: 4px; }
-        input { width: 70%; padding: 8px; }
-    </script>
+        :root { --primary: #007bff; --danger: #dc3545; --bg: #f8f9fa; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); display: flex; justify-content: center; padding: 20px; }
+        .card { background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 100%; max-width: 500px; }
+        h2 { margin-top: 0; color: #333; border-bottom: 2px solid var(--bg); padding-bottom: 10px; }
+        
+        .input-group { display: flex; gap: 10px; margin-bottom: 20px; }
+        input { flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 6px; outline: none; }
+        input:focus { border-color: var(--primary); }
+        
+        button { padding: 10px 15px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; transition: opacity 0.2s; }
+        .btn-add { background: var(--primary); color: white; }
+        .btn-del { background: none; color: var(--danger); border: 1px solid var(--danger); font-size: 0.8rem; }
+        button:hover { opacity: 0.8; }
+        button:disabled { background: #ccc; cursor: not-allowed; }
+
+        .message-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; background: var(--bg); margin-bottom: 8px; border-radius: 6px; }
+        .error-msg { color: var(--danger); background: #f8d7da; padding: 10px; border-radius: 6px; display: none; margin-bottom: 10px; }
+        .loading { font-style: italic; color: #666; text-align: center; margin: 20px 0; }
+    </style>
 </head>
 <body>
 
-    <h2>Message Database</h2>
-    
-    <div style="margin-bottom: 20px;">
-        <input type="text" id="msgInput" placeholder="Enter message...">
-        <button onclick="addRow()">Add Row</button>
-    </div>
+    <div class="card">
+        <h2>📊 DB Manager</h2>
+        
+        <div id="errorBox" class="error-msg"></div>
 
-    <div id="messageList">Loading messages...</div>
+        <div class="input-group">
+            <input type="text" id="msgInput" placeholder="Type a new message...">
+            <button class="btn-add" onclick="addRow()" id="addBtn">Add</button>
+        </div>
+
+        <hr>
+
+        <div id="loadingIndicator" class="loading">Connecting to Cloudflare...</div>
+        <div id="messageList"></div>
+    </div>
 
     <script>
         const API_URL = "https://my-python-cloudflare-api.markku-lab.workers.dev";
+        const msgList = document.getElementById('messageList');
+        const loading = document.getElementById('loadingIndicator');
+        const errorBox = document.getElementById('errorBox');
 
-        // 1. READ rows
-        async function loadRows() {
-            const res = await fetch(API_URL);
-            const data = await res.json();
-            const container = document.getElementById('messageList');
-            container.innerHTML = data.map(row => `
-                <div class="row">
-                    <span>${row.content}</span>
-                    <button class="del-btn" onclick="deleteRow(${row.id})">Delete</button>
-                </div>
-            `).join('');
+        function showError(msg) {
+            errorBox.textContent = "Error: " + msg;
+            errorBox.style.display = "block";
+            loading.style.display = "none";
         }
 
-        // 2. CREATE row
+        async function loadRows() {
+            try {
+                errorBox.style.display = "none";
+                const res = await fetch(API_URL);
+                if (!res.ok) throw new Error(`Server responded with ${res.status}`);
+                
+                const data = await res.json();
+                loading.style.display = "none";
+                
+                if (data.length === 0) {
+                    msgList.innerHTML = "<p style='text-align:center; color:#999;'>No messages yet.</p>";
+                    return;
+                }
+
+                msgList.innerHTML = data.map(row => `
+                    <div class="message-item">
+                        <span>${row.content}</span>
+                        <button class="btn-del" onclick="deleteRow(${row.id})">Delete</button>
+                    </div>
+                `).join('');
+            } catch (err) {
+                showError(err.message);
+            }
+        }
+
         async function addRow() {
             const input = document.getElementById('msgInput');
-            await fetch(API_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ message: input.value })
-            });
-            input.value = '';
-            loadRows(); // Refresh list
+            const btn = document.getElementById('addBtn');
+            if (!input.value) return;
+
+            btn.disabled = true;
+            try {
+                await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: input.value })
+                });
+                input.value = '';
+                await loadRows();
+            } catch (err) {
+                showError("Could not add row.");
+            } finally {
+                btn.disabled = false;
+            }
         }
 
-        // 3. DELETE row
         async function deleteRow(id) {
-            await fetch(API_URL, {
-                method: 'DELETE',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ id: id })
-            });
-            loadRows(); // Refresh list
+            try {
+                await fetch(API_URL, {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id: id })
+                });
+                await loadRows();
+            } catch (err) {
+                showError("Could not delete row.");
+            }
         }
 
-        // Initial Load
+        // Start
         loadRows();
     </script>
 </body>
