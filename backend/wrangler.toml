@@ -1,0 +1,9 @@
+name = "my-python-cloudflare-api"
+main = "src/entry.py"
+compatibility_date = "2025-08-14"
+compatibility_flags = ["python_workers"]
+
+[[d1_databases]]
+binding = "DB" # This is how we will call it in Python
+database_name = "my-db"
+database_id = "86f79eb9-8c8a-4a3d-8173-b46bc632500d"
