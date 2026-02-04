@@ -3,3 +3,11 @@ CREATE TABLE IF NOT EXISTS messages (
     content TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+CREATE TABLE IF NOT EXISTS webpage_visitors (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  ip_address TEXT,
+  country TEXT,
+  city TEXT,
+  payload TEXT,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
